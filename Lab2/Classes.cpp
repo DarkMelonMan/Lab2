@@ -345,8 +345,6 @@ void DamageTest::ChooseClass()
 			if (choice < 1 || choice > 3)
 				cout << "Wrong choice. Try again: " << endl;
 		} while (choice < 1 || choice > 3);
-		if (choice == 3)
-			exit(0);
 		MonsterEntity* monster1 = new MonsterEntity("Blob", 20, 1.5, 15, 8, magic, fire);
 		MonsterEntity* monster2 = new MonsterEntity("Ben", 20, 1.5, 15, 8, magic, lighting);
 		PlayerEntity* player1 = new PlayerEntity("Henry", 20, 1, new Armor(10, 35, fire), new Weapon (10, 10, fire));
@@ -410,7 +408,7 @@ void DamageTest::ChooseTestType(){
 			DamageTest::ChooseClass();
 			break;
 		default:
-			exit(0);
+			break;
 		}
 	} while (testChoice != 3);
 
