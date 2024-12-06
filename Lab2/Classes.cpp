@@ -2,7 +2,7 @@
 #include "Classes.h"
 #include "Structures.cpp"
 
-void LivingEntity::hurt(double damage) {
+void LivingEntity::Hurt(double damage) {
 	healthPoints -= damage;
 	if (healthPoints <= 0) {
 		healthPoints = 0;
@@ -46,9 +46,9 @@ void LivingEntity::Print() {
 	cout << endl << "Movement speed: " << movementSpeed;
 }
 
-double LivingEntity::GetHealthPoints()
+double* LivingEntity::GetHealthPoints()
 {
-	return this->healthPoints;
+	return &healthPoints;
 }
 
 void Armor::inputArmorFields()
@@ -79,13 +79,21 @@ void Armor::inputArmorFields()
 	cout << endl << "New armor created!";
 }
 
-double Armor::GetActualDamage(double baseDamage, double elementDamage, Element damageType) {
-	double damage = baseDamage * (1 - this->baseDefence / 100);
-	if (this->defenceType == damageType && damageType != none)
-		damage += elementDamage * (1 - this->elementDefence / 100);
-	else if (damageType != none) damage += elementDamage;
-	return damage;
-};
+double Armor::GetBaseDefence()
+{
+	return baseDefence;
+}
+;
+
+double Armor::GetElementDefence()
+{
+	return elementDefence;
+}
+
+Element Armor::GetDefenceType()
+{
+	return defenceType;
+}
 
 Armor::Armor()
 {
@@ -99,6 +107,48 @@ Armor::Armor(double baseDefence, double elementDefence, Element defenceType)
 	if (this->defenceType != none)
 		this->elementDefence = elementDefence;
 	else this->elementDefence = 0;
+}
+
+Armor Armor::operator+(Armor& armor)
+{
+	double resultBaseDefence, resultElementDefence;
+	Element resultDefenceType = none;
+	if (baseDefence + armor.baseDefence < 100)
+		resultBaseDefence = baseDefence + armor.baseDefence;
+	else
+		resultBaseDefence = 99;
+	if (defenceType == armor.defenceType) {
+		resultElementDefence = elementDefence + armor.elementDefence;
+		resultDefenceType = defenceType;
+	}
+	else if (elementDefence > armor.elementDefence) {
+		resultElementDefence = elementDefence;
+		resultDefenceType = defenceType;
+	}
+	else { 
+		resultElementDefence = armor.elementDefence; 
+		resultDefenceType = armor.defenceType;
+	}
+	return Armor(resultBaseDefence, resultElementDefence, resultDefenceType);
+}
+
+Armor Armor::operator ++ ()
+{
+	if (baseDefence + 1 < 100)
+		baseDefence++;
+	if (elementDefence + 1 < 100)
+		elementDefence++;
+	return *this;
+}
+
+Armor Armor::operator ++ (int)
+{
+	Armor oldArmor = Armor(baseDefence, elementDefence, defenceType);
+	if (baseDefence + 1 < 100)
+		baseDefence++;
+	if (elementDefence + 1 < 100)
+		elementDefence++;
+	return oldArmor;
 }
 
 void Armor::Print()
@@ -148,14 +198,19 @@ Weapon::Weapon() {
 	inputWeaponFields();
 }
 
-double Weapon::GetDamage(Element weakness)
+double Weapon::GetBaseDamage()
 {
-	double damage = baseDamage;
-	if (weakness == damageType && weakness != none)
-		damage += elementDamage;
-	else if (weakness != none)
-		damage += elementDamage * 0.5;
-	return damage;
+	return baseDamage;
+}
+
+double Weapon::GetElementDamage()
+{
+	return elementDamage;
+}
+
+double Weapon::GetDamageType()
+{
+	return damageType;
 }
 
 void Weapon::Print()
@@ -238,17 +293,23 @@ Weapon* PlayerEntity::GetWeapon()
 	return this->weapon;
 }
 
-void MonsterEntity::Hurt(double damage) {
-	LivingEntity::hurt(damage);
-}
-
-void PlayerEntity::Hurt(double baseDamage, double elementDamage, Element damageType) {
-	LivingEntity::hurt(this->GetArmor()->GetActualDamage(baseDamage, elementDamage, damageType));
-}
-
-void PlayerEntity::AttackMonster(MonsterEntity* monster)
+void AttackMonster(PlayerEntity& player, MonsterEntity& monster)
 {
-	monster->Hurt(GetWeapon()->GetDamage(monster->GetMonsterWeakness()));
+	double damage = player.weapon->GetBaseDamage();
+	if (monster.GetMonsterWeakness() == player.weapon->GetDamageType() && monster.GetMonsterWeakness() != none)
+		damage += player.weapon->GetElementDamage();
+	else if (monster.GetMonsterWeakness() != none)
+		damage += player.weapon->GetElementDamage() * 0.5;
+	monster.Hurt(damage);
+}
+
+void AttackPlayer(MonsterEntity& monster, PlayerEntity& player)
+{
+	double damage = monster.baseDamage * (1 - player.GetArmor()->GetBaseDefence() / 100);
+	if (player.GetArmor()->GetDefenceType() == monster.damageType && monster.damageType != none)
+		damage += monster.elementDamage * (1 - player.GetArmor()->GetElementDefence() / 100);
+	else if (monster.damageType != none) damage += monster.elementDamage;
+	player.Hurt(damage);
 }
 
 void PlayerEntity::Print()
@@ -256,10 +317,6 @@ void PlayerEntity::Print()
 	LivingEntity::Print();
 	GetArmor()->Print();
 	GetWeapon()->Print();
-}
-
-void MonsterEntity::AttackPlayer(PlayerEntity* player) {
-	player->Hurt(this->baseDamage, this->elementDamage, this->damageType);
 }
 
 void MonsterEntity::Print(){
@@ -273,8 +330,10 @@ void MonsterEntity::Print(){
 
 Element MonsterEntity::GetMonsterWeakness()
 {
-	return this->weakness;
+	return weakness;
 }
+
+int DamageTest::testChoice = 0;
 
 void DamageTest::ChooseStruct()
 {
@@ -313,13 +372,13 @@ void DamageTest::ChooseStruct()
 			break;
 		case 2:
 			playerEntityAttack(player1, monster1);
-			// Óðîí = 20 - 10 - 10 * 0.5 = 5
+			// Ð£Ñ€Ð¾Ð½ = 20 - 10 - 10 * 0.5 = 5
 			if (*monster1.entity.healthPoints + 0.00001 > 5 && *monster1.entity.healthPoints - 0.00001 < 5)
 				cout << endl << "Test 1 was successful";
 			else
 				cout << endl << "Current monster health points = " << *monster1.entity.healthPoints
 				<< " , but it must be 5. Test was unsuccessful";
-			// Óðîí = 20 - 10 - 10 = 0
+			// Ð£Ñ€Ð¾Ð½ = 20 - 10 - 10 = 0
 			playerEntityAttack(player2, monster2);
 			if (*monster2.entity.healthPoints + 0.00001 > 0 && *monster2.entity.healthPoints - 0.00001 < 0)
 				cout << endl << "Test 2 was successful";
@@ -339,77 +398,72 @@ void DamageTest::ChooseClass()
 	int choice;
 	do {
 		cout << endl << "Choose class type:" << endl << "1)MonsterEntity" << endl <<
-			"2)PlayerEntity" << endl << "3)Exit" << endl;
+			"2)PlayerEntity" << endl << "3)Armor" << endl << "4)Exit" << endl;
 		do {
 			cin >> choice;
-			if (choice < 1 || choice > 3)
+			if (choice < 1 || choice > 4)
 				cout << "Wrong choice. Try again: " << endl;
-		} while (choice < 1 || choice > 3);
+		} while (choice < 1 || choice > 4);
 		MonsterEntity* monster1 = new MonsterEntity("Blob", 20, 1.5, 15, 8, magic, fire);
 		MonsterEntity* monster2 = new MonsterEntity("Ben", 20, 1.5, 15, 8, magic, lighting);
 		PlayerEntity* player1 = new PlayerEntity("Henry", 20, 1, new Armor(10, 35, fire), new Weapon (10, 10, fire));
 		PlayerEntity* player2 = new PlayerEntity("Harry", 25, 1, new Armor(10, 35, magic), new Weapon(10, 10, magic));
+		Armor armor1 = Armor(10, 35, fire);
+		Armor armor2 = Armor(95, 20, magic);
+		Armor resArmor = Armor(0, 0, none);
+		Armor resArmor2 = Armor(0, 0, none);
 		switch (choice) {
 		case 1:
 			cout << "Damage system test: monster attacks player:" << endl;
-			monster1->AttackPlayer(player1);
-			if (player1->GetHealthPoints() + 0.00001 > 1.3 && player1->GetHealthPoints() - 0.00001 < 1.3)
+			AttackPlayer(*monster1, *player1);
+			if (*player1->GetHealthPoints() + 0.00001 > 1.3 && *player1->GetHealthPoints() - 0.00001 < 1.3)
 				cout << endl << "Test 1 was successful";
 			else
-				cout << endl << "Current player health points = " << player1->GetHealthPoints() 
+				cout << endl << "Current player health points = " << *player1->GetHealthPoints() 
 				<< " , but it must be 1,3. Test was unsuccessful";
-			monster2->AttackPlayer(player2);
-			if (player2->GetHealthPoints() + 0.00001 > 3.5 && player2->GetHealthPoints() - 0.00001 < 3.5)
+			AttackPlayer(*monster2, *player2);
+			if (*player2->GetHealthPoints() + 0.00001 > 3.5 && *player2->GetHealthPoints() - 0.00001 < 3.5)
 				cout << endl << "Test 2 was successful";
 			else
-				cout << endl << "Current player health points = " << player2->GetHealthPoints()
+				cout << endl << "Current player health points = " << *player2->GetHealthPoints()
 				<< " , but it must be 3,5. Test was unsuccessful";
 			break;
 		case 2:
 			cout << "Damage system test: player attacks monster:" << endl;
-			player1->AttackMonster(monster1);
-			// Óðîí = 20 - 10 - 10 * 0.5 = 5
-			if (monster1->GetHealthPoints() + 0.00001 > 5 && monster1->GetHealthPoints() - 0.00001 < 5)
+			AttackMonster(*player1, *monster1);
+			// Ð£Ñ€Ð¾Ð½ = 20 - 10 - 10 * 0.5 = 5
+			if (*monster1->GetHealthPoints() + 0.00001 > 5 && *monster1->GetHealthPoints() - 0.00001 < 5)
 				cout << endl << "Test 1 was successful";
 			else
-				cout << endl << "Current monster health points = " << monster1->GetHealthPoints()
+				cout << endl << "Current monster health points = " << *monster1->GetHealthPoints()
 				<< " , but it must be 5. Test was unsuccessful";
-			// Óðîí = 20 - 10 - 10 = 0
-			player2->AttackMonster(monster2);
-			if (monster2->GetHealthPoints() + 0.00001 > 0 && monster2->GetHealthPoints() - 0.00001 < 0)
+			// Ð£Ñ€Ð¾Ð½ = 20 - 10 - 10 = 0
+			AttackMonster(*player2, *monster2);
+			if (*monster2->GetHealthPoints() + 0.00001 > 0 && *monster2->GetHealthPoints() - 0.00001 < 0)
 				cout << endl << "Test 2 was successful";
 			else
-				cout << endl << "Current monster health points = " << monster2->GetHealthPoints()
+				cout << endl << "Current monster health points = " << *monster2->GetHealthPoints()
 				<< " , but it must be 0. Test was unsuccessful";
+			break;
+		case 3:
+			resArmor = armor1 + armor2;
+			if (resArmor.GetBaseDefence() + 0.00001 > 99 && resArmor.GetBaseDefence() - 0.00001 < 99 && 
+				resArmor.GetElementDefence() + 0.00001 > 35 && resArmor.GetElementDefence() - 0.00001 < 35 && resArmor.GetDefenceType() == fire)
+				cout << endl << "Test 1 was successful";
+			else cout << endl << "Test 1 was unsuccessful, result armor base defence = " << resArmor.GetBaseDefence() << ", element defence = " <<
+				resArmor.GetElementDefence() << ", defence type: " << resArmor.GetDefenceType();
+			++armor1;
+			if (armor1.GetBaseDefence() + 0.00001 > 11 && armor1.GetBaseDefence() - 0.00001 < 11)
+				cout << endl << "Test 2 was successful";
+			else cout << endl << "Test 2 was unsuccessful, result armor base defence = " << armor1.GetBaseDefence();
+			resArmor2 = armor1++;
+			if (resArmor2.GetBaseDefence() + 0.00001 > 11 && resArmor2.GetBaseDefence() - 0.00001 < 11)
+				cout << endl << "Test 3 was successful";
+			else cout << endl << "Test 3 was unsuccessful, result armor base defence = " << resArmor2.GetBaseDefence();
 			break;
 		default:
 			break;
 		}
 		
-	} while (choice != 3);
-}
-void DamageTest::ChooseTestType(){
-	int testChoice;
-	do {
-		cout << endl << "Choose test type:" << endl << "1)Structures" << endl <<
-			"2)Classes" << endl << "3)Exit" << endl;
-		do {
-			cin >> testChoice;
-			if (testChoice < 1 || testChoice > 3)
-				cout << "Wrong choice. Try again: " << endl;
-		} while (testChoice < 1 || testChoice > 3);
-		if (testChoice == 3)
-			exit(0);
-		switch (testChoice) {
-		case 1:
-			DamageTest::ChooseStruct();
-			break;
-		case 2:
-			DamageTest::ChooseClass();
-			break;
-		default:
-			break;
-		}
-	} while (testChoice != 3);
-
+	} while (choice != 4);
 }
