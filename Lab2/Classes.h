@@ -4,45 +4,44 @@
 using namespace std;
 
 /// <summary>
-/// Класс живых существ, надкласс для классов монстров и игроков
+/// РљР»Р°СЃСЃ Р¶РёРІС‹С… СЃСѓС‰РµСЃС‚РІ, РЅР°РґРєР»Р°СЃСЃ РґР»СЏ РєР»Р°СЃСЃРѕРІ РјРѕРЅСЃС‚СЂРѕРІ Рё РёРіСЂРѕРєРѕРІ
 /// </summary>
 class LivingEntity {
 protected:
 	string name;
 	double healthPoints;
 	double movementSpeed;
-
-	/// <summary>
-	/// Получить урон
-	/// </summary>
-	/// <param name="damage">Получаемый игроком урон</param>
-	void hurt(double damage);
 	
 	/// <summary>
-	/// Ввод всех полей
+	/// Р’РІРѕРґ РІСЃРµС… РїРѕР»РµР№
 	/// </summary>
 	void inputLivingEntityFields();
 
 public:
-	
 	LivingEntity(string name, double healthPoints, double movementSpeed);
 	LivingEntity();
 	~LivingEntity() {};
 
 	/// <summary>
-	/// Вывод на экран всех полей
+	/// Р’С‹РІРѕРґ РЅР° СЌРєСЂР°РЅ РІСЃРµС… РїРѕР»РµР№
 	/// </summary>
 	void Print();
 
 	/// <summary>
-	/// Получить количество очков здоровья
+	/// РџРѕР»СѓС‡РёС‚СЊ РєРѕР»РёС‡РµСЃС‚РІРѕ РѕС‡РєРѕРІ Р·РґРѕСЂРѕРІСЊСЏ
 	/// </summary>
-	/// <returns>Количество очков здоровья</returns>
-	double GetHealthPoints();
+	/// <returns>РљРѕР»РёС‡РµСЃС‚РІРѕ РѕС‡РєРѕРІ Р·РґРѕСЂРѕРІСЊСЏ</returns>
+	double* GetHealthPoints();
+
+	/// <summary>
+	/// РџРѕР»СѓС‡РёС‚СЊ СѓСЂРѕРЅ
+	/// </summary>
+	/// <param name="damage">РџРѕР»СѓС‡Р°РµРјС‹Р№ РёРіСЂРѕРєРѕРј СѓСЂРѕРЅ</param>
+	void Hurt(double damage);
 };
 
 /// <summary>
-/// Класс брони игрока
+/// РљР»Р°СЃСЃ Р±СЂРѕРЅРё РёРіСЂРѕРєР°
 /// </summary>
 class Armor {
 private:
@@ -50,27 +49,48 @@ private:
 	double elementDefence;
 	Element defenceType;
 	/// <summary>
-	/// Ввод всех полей
+	/// Р’РІРѕРґ РІСЃРµС… РїРѕР»РµР№
 	/// </summary>
 	void inputArmorFields();
 public:
+
 	/// <summary>
-	/// Получить количество урона с учётом показателей брони
+	/// РџРѕР»СѓС‡РёС‚СЊ Р·РЅР°С‡РµРЅРёРµ Р±Р°Р·РѕРІРѕР№ Р·Р°С‰РёС‚С‹
 	/// </summary>
-	/// <returns>Количество урона с учётом брони</returns>
-	double GetActualDamage(double baseDamage, double elementDamage, Element damageType);
-	
+	/// <returns>Р—РЅР°С‡РµРЅРёРµ Р±Р°Р·РѕРІРѕР№ Р·Р°С‰РёС‚С‹ Р±СЂРѕРЅРё</returns>
+	double GetBaseDefence();
+
+	/// <summary>
+	/// РџРѕР»СѓС‡РёС‚СЊ Р·РЅР°С‡РµРЅРёРµ СЃС‚РёС…РёР№РЅРѕР№ Р·Р°С‰РёС‚С‹
+	/// </summary>
+	/// <returns>Р—РЅР°С‡РµРЅРёРµ СЃС‚РёС…РёР№РЅРѕР№ Р·Р°С‰РёС‚С‹ Р±СЂРѕРЅРё</returns>
+	double GetElementDefence();
+
+	/// <summary>
+	/// РџРѕР»СѓС‡РёС‚СЊ С‚РёРї СЃС‚РёС…РёР№РЅРѕР№ Р·Р°С‰РёС‚С‹
+	/// </summary>
+	/// <returns>РўРёРї СЃС‚РёС…РёР№РЅРѕР№ Р·Р°С‰РёС‚С‹ Р±СЂРѕРЅРё</returns>
+	Element GetDefenceType();
+
 	Armor();
 	Armor(double baseDefence, double elementDefence, Element defenceType);
 	
+	Armor operator+(Armor& armor);
+
+	Armor operator++();
+
+	Armor operator++(int);
+
+
+
 	/// <summary>
-	/// Вывод на экран всех полей
+	/// Р’С‹РІРѕРґ РЅР° СЌРєСЂР°РЅ РІСЃРµС… РїРѕР»РµР№
 	/// </summary>
 	void Print();
 };
 
 /// <summary>
-/// Класс оружия игрока
+/// РљР»Р°СЃСЃ РѕСЂСѓР¶РёСЏ РёРіСЂРѕРєР°
 /// </summary>
 class Weapon {
 private:
@@ -79,7 +99,7 @@ private:
 	double elementDamage;
 	
 	/// <summary>
-	/// Ввод всех полей
+	/// Р’РІРѕРґ РІСЃРµС… РїРѕР»РµР№
 	/// </summary>
 	void inputWeaponFields();
 public:
@@ -87,24 +107,36 @@ public:
 	Weapon();
 
 	/// <summary>
-	/// Получить общее количество урона
+	/// РџРѕР»СѓС‡РёС‚СЊ Р±Р°Р·РѕРІРѕРµ РєРѕР»РёС‡РµСЃС‚РІРѕ СѓСЂРѕРЅР°
 	/// </summary>
-	/// <returns>Общее количество урона</returns>
-	double GetDamage(Element weakness);
+	/// <returns>Р‘Р°Р·РѕРІРѕРµ РєРѕР»РёС‡РµСЃС‚РІРѕ СѓСЂРѕРЅР°</returns>
+	double GetBaseDamage();
+
+	/// <summary>
+	/// РџРѕР»СѓС‡РёС‚СЊ РєРѕР»РёС‡РµСЃС‚РІРѕ СЃС‚РёС…РёР№РЅРѕРіРѕ СѓСЂРѕРЅР°
+	/// </summary>
+	/// <returns>РљРѕР»РёС‡РµСЃС‚РІРѕ СЃС‚РёС…РёР№РЅРѕРіРѕ СѓСЂРѕРЅР°</returns>
+	double GetElementDamage();
+
+	/// <summary>
+	/// РџРѕР»СѓС‡РёС‚СЊ С‚РёРї СЃС‚РёС…РёР№РЅРѕРіРѕ СѓСЂРѕРЅР°
+	/// </summary>
+	/// <returns>РўРёРї СЃС‚РёС…РёР№РЅРѕРіРѕ СѓСЂРѕРЅР°</returns>
+	double GetDamageType();
 	
 	/// <summary>
-	/// Вывод всех полей
+	/// Р’С‹РІРѕРґ РІСЃРµС… РїРѕР»РµР№
 	/// </summary>
 	void Print();
 };
 
 /// <summary>
-/// Класс монстра - игрового противника
+/// РљР»Р°СЃСЃ РјРѕРЅСЃС‚СЂР° - РёРіСЂРѕРІРѕРіРѕ РїСЂРѕС‚РёРІРЅРёРєР°
 /// </summary>
 class MonsterEntity;
 
 /// <summary>
-/// Класс игрока
+/// РљР»Р°СЃСЃ РёРіСЂРѕРєР°
 /// </summary>
 class PlayerEntity : public LivingEntity {
 private:
@@ -112,7 +144,7 @@ private:
 	Weapon* weapon;
 
 	/// <summary>
-	/// Ввод всех полей
+	/// Р’РІРѕРґ РІСЃРµС… РїРѕР»РµР№
 	/// </summary>
 	void inputPlayerEntityFields();
 public:
@@ -120,33 +152,25 @@ public:
 	PlayerEntity();
 
 	/// <summary>
-	/// Получить объект брони игрока
+	/// РџРѕР»СѓС‡РёС‚СЊ РѕР±СЉРµРєС‚ Р±СЂРѕРЅРё РёРіСЂРѕРєР°
 	/// </summary>
-	/// <returns>Объект брони игрока</returns>
+	/// <returns>РћР±СЉРµРєС‚ Р±СЂРѕРЅРё РёРіСЂРѕРєР°</returns>
 	Armor* GetArmor();
 	
 	/// <summary>
-	/// Получить объект оружия игрока
+	/// РџРѕР»СѓС‡РёС‚СЊ РѕР±СЉРµРєС‚ РѕСЂСѓР¶РёСЏ РёРіСЂРѕРєР°
 	/// </summary>
-	/// <returns>Объект оружия игрока</returns>
+	/// <returns>РћР±СЉРµРєС‚ РѕСЂСѓР¶РёСЏ РёРіСЂРѕРєР°</returns>
 	Weapon* GetWeapon();
-
-	/// <summary>
-	/// Получить урон
-	/// </summary>
-	/// <param name="baseDamage">Базовый урон</param>
-	/// <param name="elementDamage">Стихийный урон</param>
-	/// <param name="damageType">Тип стихийного урона</param>
-	void Hurt(double baseDamage, double elementDamage, Element damageType);
 	
 	/// <summary>
-	/// Атаковать монстра
+	/// РђС‚Р°РєРѕРІР°С‚СЊ РјРѕРЅСЃС‚СЂР°
 	/// </summary>
-	/// <param name="monster">Указатель на объект монстра</param>
-	void AttackMonster(MonsterEntity* monster);
+	/// <param name="monster">РЈРєР°Р·Р°С‚РµР»СЊ РЅР° РѕР±СЉРµРєС‚ РјРѕРЅСЃС‚СЂР°</param>
+	friend void AttackMonster(PlayerEntity&, MonsterEntity&);
 	
 	/// <summary>
-	/// Вывод на экран всех полей
+	/// Р’С‹РІРѕРґ РЅР° СЌРєСЂР°РЅ РІСЃРµС… РїРѕР»РµР№
 	/// </summary>
 	void Print();
 };
@@ -159,54 +183,48 @@ private:
 	Element damageType;
 	
 	/// <summary>
-	/// Ввод всех полей
+	/// Р’РІРѕРґ РІСЃРµС… РїРѕР»РµР№
 	/// </summary>
 	void inputMonsterEntityFields();
 public:
 	MonsterEntity(string name, double healthPoints, double movementSpeed, double baseDamage, double elementDamage, Element weakness, Element damageType);
 	MonsterEntity();
-
-	/// <summary>
-	/// Получить урон
-	/// </summary>
-	/// <param name="damage">Общее количество урона</param>
-	void Hurt(double damage);
 	
 	/// <summary>
-	/// Атаковать игрока
+	/// РђС‚Р°РєРѕРІР°С‚СЊ РёРіСЂРѕРєР°
 	/// </summary>
-	/// <param name="player">Указатель на объект игрока</param>
-	void AttackPlayer(PlayerEntity* player);
+	/// <param name="player">РЈРєР°Р·Р°С‚РµР»СЊ РЅР° РѕР±СЉРµРєС‚ РёРіСЂРѕРєР°</param>
+	friend void AttackPlayer(MonsterEntity&, PlayerEntity&);
 	
 	/// <summary>
-	/// Вывод всех полей на экран
+	/// Р’С‹РІРѕРґ РІСЃРµС… РїРѕР»РµР№ РЅР° СЌРєСЂР°РЅ
 	/// </summary>
 	void Print();
 
 	/// <summary>
-	/// Получить стихийную слабость монстра
+	/// РџРѕР»СѓС‡РёС‚СЊ СЃС‚РёС…РёР№РЅСѓСЋ СЃР»Р°Р±РѕСЃС‚СЊ РјРѕРЅСЃС‚СЂР°
 	/// </summary>
-	/// <returns>Стихийная слабость монстра</returns>
+	/// <returns>РЎС‚РёС…РёР№РЅР°СЏ СЃР»Р°Р±РѕСЃС‚СЊ РјРѕРЅСЃС‚СЂР°</returns>
 	Element GetMonsterWeakness();
 };
 
 /// <summary>
-/// Класс для проверки системы урона
+/// РљР»Р°СЃСЃ РґР»СЏ РїСЂРѕРІРµСЂРєРё СЃРёСЃС‚РµРјС‹ СѓСЂРѕРЅР°
 /// </summary>
 static class DamageTest {
 public:
 	/// <summary>
-	/// Выбор структуры для тестирования системы урона
+	/// Р’С‹Р±РѕСЂ СЃС‚СЂСѓРєС‚СѓСЂС‹ РґР»СЏ С‚РµСЃС‚РёСЂРѕРІР°РЅРёСЏ СЃРёСЃС‚РµРјС‹ СѓСЂРѕРЅР°
 	/// </summary>
 	static void ChooseStruct();
 	
 	/// <summary>
-	/// Выбор класса для тестирования системы урона
+	/// Р’С‹Р±РѕСЂ РєР»Р°СЃСЃР° РґР»СЏ С‚РµСЃС‚РёСЂРѕРІР°РЅРёСЏ СЃРёСЃС‚РµРјС‹ СѓСЂРѕРЅР°
 	/// </summary>
 	static void ChooseClass();
-
+	
 	/// <summary>
-	/// Выбор варианта тестирования системы урона: тестирование структур или классов
+	/// РџРѕР»Рµ, РѕР±РѕР·РЅР°С‡Р°СЋС‰РµРµ РІР°СЂРёР°РЅС‚ С‚РµСЃС‚РёСЂРѕРІР°РЅРёСЏ: С‚РµСЃС‚РёСЂРѕРІР°РЅРёРµ СЃС‚СЂСѓРєС‚СѓСЂ РёР»Рё С‚РµСЃС‚РёСЂРѕРІР°РЅРёРµ РєР»Р°СЃСЃРѕРІ 
 	/// </summary>
-	static void ChooseTestType();
+	static int testChoice;
 };
