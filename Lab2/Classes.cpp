@@ -361,14 +361,12 @@ void DamageTest::ChooseStruct()
 			if (*player1.entity.healthPoints + 0.00001 > 1.3 && *player1.entity.healthPoints - 0.00001 < 1.3)
 				cout << endl << "Test 1 was successful";
 			else
-				cout << endl << "Current player health points = " << *player1.entity.healthPoints
-				<< " , but it must be 1,3. Test was unsuccessful";
+				throw TestError(*player1.entity.healthPoints, 1.3, "player health points");
 			monsterEntityAttack(monster2, player2);
 			if (*player2.entity.healthPoints + 0.00001 > 3.5 && *player2.entity.healthPoints - 0.00001 < 3.5)
 				cout << endl << "Test 2 was successful";
 			else
-				cout << endl << "Current player health points = " << *player2.entity.healthPoints
-				<< " , but it must be 3,5. Test was unsuccessful";
+				throw TestError(*player2.entity.healthPoints, 3.5, "player health points");
 			break;
 		case 2:
 			playerEntityAttack(player1, monster1);
@@ -376,15 +374,13 @@ void DamageTest::ChooseStruct()
 			if (*monster1.entity.healthPoints + 0.00001 > 5 && *monster1.entity.healthPoints - 0.00001 < 5)
 				cout << endl << "Test 1 was successful";
 			else
-				cout << endl << "Current monster health points = " << *monster1.entity.healthPoints
-				<< " , but it must be 5. Test was unsuccessful";
+				throw TestError(*monster1.entity.healthPoints, 5, "monster health points");
 			// Урон = 20 - 10 - 10 = 0
 			playerEntityAttack(player2, monster2);
 			if (*monster2.entity.healthPoints + 0.00001 > 0 && *monster2.entity.healthPoints - 0.00001 < 0)
 				cout << endl << "Test 2 was successful";
 			else
-				cout << endl << "Current monster health points = " << *monster2.entity.healthPoints
-				<< " , but it must be 0. Test was unsuccessful";
+				throw TestError(*monster2.entity.healthPoints, 0, "monster health points");
 			break;
 		default:
 			break;
@@ -419,14 +415,12 @@ void DamageTest::ChooseClass()
 			if (*player1->GetHealthPoints() + 0.00001 > 1.3 && *player1->GetHealthPoints() - 0.00001 < 1.3)
 				cout << endl << "Test 1 was successful";
 			else
-				cout << endl << "Current player health points = " << *player1->GetHealthPoints() 
-				<< " , but it must be 1,3. Test was unsuccessful";
+				throw TestError(*player1->GetHealthPoints(), 1.3, "player health points");
 			AttackPlayer(*monster2, *player2);
 			if (*player2->GetHealthPoints() + 0.00001 > 3.5 && *player2->GetHealthPoints() - 0.00001 < 3.5)
 				cout << endl << "Test 2 was successful";
 			else
-				cout << endl << "Current player health points = " << *player2->GetHealthPoints()
-				<< " , but it must be 3,5. Test was unsuccessful";
+				throw TestError(*player2->GetHealthPoints(), 3.5, "player health points");
 			break;
 		case 2:
 			cout << "Damage system test: player attacks monster:" << endl;
@@ -435,31 +429,36 @@ void DamageTest::ChooseClass()
 			if (*monster1->GetHealthPoints() + 0.00001 > 5 && *monster1->GetHealthPoints() - 0.00001 < 5)
 				cout << endl << "Test 1 was successful";
 			else
-				cout << endl << "Current monster health points = " << *monster1->GetHealthPoints()
-				<< " , but it must be 5. Test was unsuccessful";
+				throw TestError(*monster1->GetHealthPoints(), 5, "monster health points");
 			// Урон = 20 - 10 - 10 = 0
 			AttackMonster(*player2, *monster2);
 			if (*monster2->GetHealthPoints() + 0.00001 > 0 && *monster2->GetHealthPoints() - 0.00001 < 0)
 				cout << endl << "Test 2 was successful";
 			else
-				cout << endl << "Current monster health points = " << *monster2->GetHealthPoints()
-				<< " , but it must be 0. Test was unsuccessful";
+				throw TestError(*monster2->GetHealthPoints(), 0, "monster health points");
 			break;
 		case 3:
 			resArmor = armor1 + armor2;
 			if (resArmor.GetBaseDefence() + 0.00001 > 99 && resArmor.GetBaseDefence() - 0.00001 < 99 && 
 				resArmor.GetElementDefence() + 0.00001 > 35 && resArmor.GetElementDefence() - 0.00001 < 35 && resArmor.GetDefenceType() == fire)
 				cout << endl << "Test 1 was successful";
-			else cout << endl << "Test 1 was unsuccessful, result armor base defence = " << resArmor.GetBaseDefence() << ", element defence = " <<
-				resArmor.GetElementDefence() << ", defence type: " << resArmor.GetDefenceType();
+			else {
+				throw TestError(resArmor.GetBaseDefence(), 99, "result armor base defence");
+				throw TestError(resArmor.GetElementDefence(), 35, "result armor element defence");
+				throw TestError(resArmor.GetDefenceType(), fire, "result armor defence type");
+			}
 			++armor1;
 			if (armor1.GetBaseDefence() + 0.00001 > 11 && armor1.GetBaseDefence() - 0.00001 < 11)
 				cout << endl << "Test 2 was successful";
-			else cout << endl << "Test 2 was unsuccessful, result armor base defence = " << armor1.GetBaseDefence();
+			else {
+				throw TestError(armor1.GetBaseDefence(), 11, "result armor base defence");
+			}
 			resArmor2 = armor1++;
 			if (resArmor2.GetBaseDefence() + 0.00001 > 11 && resArmor2.GetBaseDefence() - 0.00001 < 11)
 				cout << endl << "Test 3 was successful";
-			else cout << endl << "Test 3 was unsuccessful, result armor base defence = " << resArmor2.GetBaseDefence();
+			else {
+				throw TestError(resArmor2.GetBaseDefence(), 11, "result armor base defence");
+			}
 			break;
 		default:
 			break;
