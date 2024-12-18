@@ -1,6 +1,7 @@
 #pragma once
 #include <iostream>
 #include "Util.h"
+#include <string>
 using namespace std;
 
 /// <summary>
@@ -206,6 +207,12 @@ public:
 	/// </summary>
 	/// <returns>Стихийная слабость монстра</returns>
 	Element GetMonsterWeakness();
+};
+
+class TestError : public runtime_error {
+public:
+	TestError(double currentValue, double expectedValue, const char* currentValueName) : runtime_error("Current " + *currentValueName + to_string(currentValue) + ", but it must be " + to_string(expectedValue)) {
+	};
 };
 
 /// <summary>
