@@ -394,7 +394,7 @@ void DamageTest::ChooseClass()
 	int choice;
 	do {
 		cout << endl << "Choose class type:" << endl << "1)MonsterEntity" << endl <<
-			"2)PlayerEntity" << endl << "3)Armor" << endl << "4)Matrix of objects" << endl << "5)Exit" << endl;
+			"2)PlayerEntity" << endl << "3)Armor" << endl << "4)2d and 1d array" << endl << "5)Exit" << endl;
 		do {
 			cin >> choice;
 			if (choice < 1 || choice > 5)
@@ -408,7 +408,8 @@ void DamageTest::ChooseClass()
 		Armor armor2 = Armor(95, 20, magic);
 		Armor resArmor = Armor(0, 0, none);
 		Armor resArmor2 = Armor(0, 0, none);
-		LivingEntity matrix[2][2] = {LivingEntity("Blob", 10, 1.5), LivingEntity("Eddie", 35, 1), LivingEntity("Henry", 12, 2), LivingEntity("Ben", 43, 1)};
+		LivingEntity objectsArray[4] = { LivingEntity("Blob", 10, 1.5), LivingEntity("Eddie", 35, 1), LivingEntity("Henry", 12, 2), LivingEntity("Ben", 43, 1) };
+		LivingEntity objectsMatrix[2][2] = {LivingEntity("Blob", 10, 1.5), LivingEntity("Eddie", 35, 1), LivingEntity("Henry", 12, 2), LivingEntity("Ben", 43, 1)};
 		switch (choice) {
 		case 1:
 			cout << "Damage system test: monster attacks player:" << endl;
@@ -462,9 +463,13 @@ void DamageTest::ChooseClass()
 			}
 			break;
 		case 4:
+			cout << endl << endl << "Matrix: " << endl;
 			for (int i = 0; i < 2; i++)
 				for (int j = 0; j < 2; j++)
-					matrix[i][j].Print();
+					objectsMatrix[i][j].Print();
+			cout << endl << endl << "Array: " << endl;
+			for (int i = 0; i < 4; i++)
+				objectsArray[i].Print();
 			break;
 		default:
 			break;
