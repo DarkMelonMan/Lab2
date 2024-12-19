@@ -36,7 +36,7 @@ LivingEntity::LivingEntity(string name, double healthPoints, double movementSpee
 	this->movementSpeed = movementSpeed;
 }
 
-LivingEntity::LivingEntity() { 
+LivingEntity::LivingEntity() {
 	inputLivingEntityFields();
 }
 
@@ -125,8 +125,8 @@ Armor Armor::operator+(Armor& armor)
 		resultElementDefence = elementDefence;
 		resultDefenceType = defenceType;
 	}
-	else { 
-		resultElementDefence = armor.elementDefence; 
+	else {
+		resultElementDefence = armor.elementDefence;
 		resultDefenceType = armor.defenceType;
 	}
 	return Armor(resultBaseDefence, resultElementDefence, resultDefenceType);
@@ -175,7 +175,7 @@ void Weapon::inputWeaponFields() {
 		if (baseDamage <= 0)
 			cout << endl << "Invalid base damage. Try again: ";
 	} while (baseDamage <= 0);
-		cout << endl << "Enter elemental type of damage of a new weapon (0 - none, 1 - fire, 2 - magic, 3 - lighting): ";
+	cout << endl << "Enter elemental type of damage of a new weapon (0 - none, 1 - fire, 2 - magic, 3 - lighting): ";
 	do {
 		cin >> damageType;
 		if (damageType < 0 || damageType > 3)
@@ -260,7 +260,7 @@ MonsterEntity::MonsterEntity() {
 	inputMonsterEntityFields();
 }
 
- MonsterEntity::MonsterEntity(string name, double healthPoints, double movementSpeed, double baseDamage, double elementDamage, Element weakness, Element damageType): LivingEntity(name, healthPoints, movementSpeed) {
+MonsterEntity::MonsterEntity(string name, double healthPoints, double movementSpeed, double baseDamage, double elementDamage, Element weakness, Element damageType) : LivingEntity(name, healthPoints, movementSpeed) {
 	this->baseDamage = baseDamage;
 	if (damageType != none)
 		this->elementDamage = elementDamage;
@@ -270,7 +270,7 @@ MonsterEntity::MonsterEntity() {
 }
 
 PlayerEntity::PlayerEntity() {
-	 inputPlayerEntityFields();
+	inputPlayerEntityFields();
 }
 
 void PlayerEntity::inputPlayerEntityFields() {
@@ -279,7 +279,7 @@ void PlayerEntity::inputPlayerEntityFields() {
 	cout << endl << name << " player entity created!";
 }
 
-PlayerEntity::PlayerEntity(string name, double healthPoints, double movementSpeed, Armor* armor, Weapon* weapon): LivingEntity(name, healthPoints, movementSpeed) {
+PlayerEntity::PlayerEntity(string name, double healthPoints, double movementSpeed, Armor* armor, Weapon* weapon) : LivingEntity(name, healthPoints, movementSpeed) {
 	this->armor = armor;
 	this->weapon = weapon;
 }
@@ -319,7 +319,7 @@ void PlayerEntity::Print()
 	GetWeapon()->Print();
 }
 
-void MonsterEntity::Print(){
+void MonsterEntity::Print() {
 	LivingEntity::Print();
 	cout << endl << "Base damage: " << baseDamage;
 	cout << endl << "Elemental type of damage: " << damageType;
@@ -394,20 +394,21 @@ void DamageTest::ChooseClass()
 	int choice;
 	do {
 		cout << endl << "Choose class type:" << endl << "1)MonsterEntity" << endl <<
-			"2)PlayerEntity" << endl << "3)Armor" << endl << "4)Exit" << endl;
+			"2)PlayerEntity" << endl << "3)Armor" << endl << "4)Matrix of objects" << endl << "5)Exit" << endl;
 		do {
 			cin >> choice;
-			if (choice < 1 || choice > 4)
+			if (choice < 1 || choice > 5)
 				cout << "Wrong choice. Try again: " << endl;
-		} while (choice < 1 || choice > 4);
+		} while (choice < 1 || choice > 5);
 		MonsterEntity* monster1 = new MonsterEntity("Blob", 20, 1.5, 15, 8, magic, fire);
 		MonsterEntity* monster2 = new MonsterEntity("Ben", 20, 1.5, 15, 8, magic, lighting);
-		PlayerEntity* player1 = new PlayerEntity("Henry", 20, 1, new Armor(10, 35, fire), new Weapon (10, 10, fire));
+		PlayerEntity* player1 = new PlayerEntity("Henry", 20, 1, new Armor(10, 35, fire), new Weapon(10, 10, fire));
 		PlayerEntity* player2 = new PlayerEntity("Harry", 25, 1, new Armor(10, 35, magic), new Weapon(10, 10, magic));
 		Armor armor1 = Armor(10, 35, fire);
 		Armor armor2 = Armor(95, 20, magic);
 		Armor resArmor = Armor(0, 0, none);
 		Armor resArmor2 = Armor(0, 0, none);
+		LivingEntity matrix[2][2] = {LivingEntity("Blob", 10, 1.5), LivingEntity("Eddie", 35, 1), LivingEntity("Henry", 12, 2), LivingEntity("Ben", 43, 1)};
 		switch (choice) {
 		case 1:
 			cout << "Damage system test: monster attacks player:" << endl;
@@ -439,7 +440,7 @@ void DamageTest::ChooseClass()
 			break;
 		case 3:
 			resArmor = armor1 + armor2;
-			if (resArmor.GetBaseDefence() + 0.00001 > 99 && resArmor.GetBaseDefence() - 0.00001 < 99 && 
+			if (resArmor.GetBaseDefence() + 0.00001 > 99 && resArmor.GetBaseDefence() - 0.00001 < 99 &&
 				resArmor.GetElementDefence() + 0.00001 > 35 && resArmor.GetElementDefence() - 0.00001 < 35 && resArmor.GetDefenceType() == fire)
 				cout << endl << "Test 1 was successful";
 			else {
@@ -460,9 +461,13 @@ void DamageTest::ChooseClass()
 				throw TestError(resArmor2.GetBaseDefence(), 11, "result armor base defence");
 			}
 			break;
+		case 4:
+			for (int i = 0; i < 2; i++)
+				for (int j = 0; j < 2; j++)
+					matrix[i][j].Print();
+			break;
 		default:
 			break;
 		}
-		
-	} while (choice != 4);
+	} while (choice != 5);
 }
