@@ -2,12 +2,32 @@
 #include <iostream>
 #include "Util.h"
 #include <string>
+#include <list>
 using namespace std;
+
+class Entity {
+protected:
+	string name;
+	double healthPoints;
+	virtual void inputFields() = 0;
+public:
+	/// <summary>
+	/// Получить урон
+	/// </summary>
+	/// <param name="damage">Получаемый игроком урон</param>
+	void Hurt(double damage);
+
+	/// <summary>
+	/// Получить количество очков здоровья
+	/// </summary>
+	/// <returns>Количество очков здоровья</returns>
+	double* GetHealthPoints();
+};
 
 /// <summary>
 /// Класс живых существ, надкласс для классов монстров и игроков
 /// </summary>
-class LivingEntity {
+class LivingEntity: public Entity {
 protected:
 	string name;
 	double healthPoints;
@@ -16,29 +36,16 @@ protected:
 	/// <summary>
 	/// Ввод всех полей
 	/// </summary>
-	void inputLivingEntityFields();
+	virtual void inputFields();
 
 public:
 	LivingEntity(string name, double healthPoints, double movementSpeed);
 	LivingEntity();
 	~LivingEntity() {};
 
-	/// <summary>
-	/// Вывод на экран всех полей
-	/// </summary>
-	void Print();
+	friend ostream& operator<<(ostream& os, const LivingEntity& livingEntity);
 
-	/// <summary>
-	/// Получить количество очков здоровья
-	/// </summary>
-	/// <returns>Количество очков здоровья</returns>
-	double* GetHealthPoints();
-
-	/// <summary>
-	/// Получить урон
-	/// </summary>
-	/// <param name="damage">Получаемый игроком урон</param>
-	void Hurt(double damage);
+	LivingEntity& operator=(const LivingEntity&);
 };
 
 /// <summary>
@@ -52,7 +59,7 @@ private:
 	/// <summary>
 	/// Ввод всех полей
 	/// </summary>
-	void inputArmorFields();
+	void inputFields();
 public:
 
 	/// <summary>
@@ -82,12 +89,7 @@ public:
 
 	Armor operator++(int);
 
-
-
-	/// <summary>
-	/// Вывод на экран всех полей
-	/// </summary>
-	void Print();
+	friend ostream& operator<<(ostream& os, const Armor& armor);
 };
 
 /// <summary>
@@ -102,7 +104,7 @@ private:
 	/// <summary>
 	/// Ввод всех полей
 	/// </summary>
-	void inputWeaponFields();
+	void inputFields();
 public:
 	Weapon(double baseDamage, double elementDamage, Element damageType);
 	Weapon();
@@ -125,10 +127,7 @@ public:
 	/// <returns>Тип стихийного урона</returns>
 	double GetDamageType();
 	
-	/// <summary>
-	/// Вывод всех полей
-	/// </summary>
-	void Print();
+	friend ostream& operator<<(ostream& os, const Weapon& weapon);
 };
 
 /// <summary>
@@ -147,7 +146,7 @@ private:
 	/// <summary>
 	/// Ввод всех полей
 	/// </summary>
-	void inputPlayerEntityFields();
+	void inputFields() override;
 public:
 	PlayerEntity(string name, double healthPoints, double movementSpeed, Armor* armor, Weapon* weapon);
 	PlayerEntity();
@@ -170,10 +169,9 @@ public:
 	/// <param name="monster">Указатель на объект монстра</param>
 	friend void AttackMonster(PlayerEntity&, MonsterEntity&);
 	
-	/// <summary>
-	/// Вывод на экран всех полей
-	/// </summary>
-	void Print();
+	PlayerEntity& operator=(const PlayerEntity& entity);
+
+	friend ostream& operator<<(ostream& os, const PlayerEntity& player);
 };
 
 class MonsterEntity : public LivingEntity {
@@ -186,7 +184,7 @@ private:
 	/// <summary>
 	/// Ввод всех полей
 	/// </summary>
-	void inputMonsterEntityFields();
+	void inputFields() override;
 public:
 	MonsterEntity(string name, double healthPoints, double movementSpeed, double baseDamage, double elementDamage, Element weakness, Element damageType);
 	MonsterEntity();
@@ -196,22 +194,20 @@ public:
 	/// </summary>
 	/// <param name="player">Указатель на объект игрока</param>
 	friend void AttackPlayer(MonsterEntity&, PlayerEntity&);
-	
-	/// <summary>
-	/// Вывод всех полей на экран
-	/// </summary>
-	void Print();
 
 	/// <summary>
 	/// Получить стихийную слабость монстра
 	/// </summary>
 	/// <returns>Стихийная слабость монстра</returns>
 	Element GetMonsterWeakness();
+	
+	friend ostream& operator<<(ostream& os, const MonsterEntity& monster);
 };
 
 class TestError : public runtime_error {
 public:
-	TestError(double currentValue, double expectedValue, const char* currentValueName) : runtime_error("Current " + *currentValueName + to_string(currentValue) + ", but it must be " + to_string(expectedValue)) {
+	TestError(double currentValue, double expectedValue, const char* currentValueName) : runtime_error("Current " + 
+		*currentValueName + to_string(currentValue) + ", but it must be " + to_string(expectedValue)) {
 	};
 };
 
@@ -233,5 +229,26 @@ public:
 	/// <summary>
 	/// Поле, обозначающее вариант тестирования: тестирование структур или тестирование классов 
 	/// </summary>
-	static int testChoice;
+	static int testChoice;	
+};
+
+/// <summary>
+/// Шаблон класса менеджера существ игры
+/// </summary>
+/// <typeparam name="TEntity">Класс, наследующий от LivingEntity или сам класс LivingEntity</typeparam>
+template<typename TEntity>
+class EntitiesManager {
+	static_assert(is_base_of<TEntity, LivingEntity>::value, "!");
+private:
+	static size_t size;
+	static size_t capacity;
+	void resize(size_t n);
+	TEntity* entities;
+public:
+	EntitiesManager();
+	~EntitiesManager();
+	void addEntity(TEntity entity);
+	void removeEntity(size_t index);
+	TEntity getEntity(size_t index);
+	size_t getSize();
 };
