@@ -2,14 +2,23 @@
 #include "Classes.h"
 #include "Structures.cpp"
 
-void LivingEntity::Hurt(double damage) {
+void Entity::Hurt(double damage) {
 	healthPoints -= damage;
 	if (healthPoints <= 0) {
 		healthPoints = 0;
 		cout << endl << name << " entity is dead";
 	}
 }
-void LivingEntity::inputLivingEntityFields() {
+LivingEntity& LivingEntity::operator=(const LivingEntity& entity)
+{
+	if (&entity != this) {
+		name = entity.name;
+		healthPoints = entity.healthPoints;
+		movementSpeed = entity.movementSpeed;
+	}
+	return *this;
+}
+void LivingEntity::inputFields() {
 	cout << endl << "Enter a name for a new entity: ";
 	do {
 		cin >> name;
@@ -37,21 +46,17 @@ LivingEntity::LivingEntity(string name, double healthPoints, double movementSpee
 }
 
 LivingEntity::LivingEntity() {
-	inputLivingEntityFields();
+	healthPoints = 0;
+	movementSpeed = 0;
+	name = "";
 }
 
-void LivingEntity::Print() {
-	cout << endl << endl << name << " entity:";
-	cout << endl << "Health points: " << healthPoints;
-	cout << endl << "Movement speed: " << movementSpeed;
-}
-
-double* LivingEntity::GetHealthPoints()
+double* Entity::GetHealthPoints()
 {
 	return &healthPoints;
 }
 
-void Armor::inputArmorFields()
+void Armor::inputFields()
 {
 	int defenceType;
 	cout << endl << "Enter base defence of a new armor (in %): ";
@@ -97,7 +102,7 @@ Element Armor::GetDefenceType()
 
 Armor::Armor()
 {
-	inputArmorFields();
+	inputFields();
 }
 
 Armor::Armor(double baseDefence, double elementDefence, Element defenceType)
@@ -151,14 +156,6 @@ Armor Armor::operator ++ (int)
 	return oldArmor;
 }
 
-void Armor::Print()
-{
-	cout << endl << "Player armor:";
-	cout << endl << "Base defence: " << this->baseDefence << "%";
-	cout << endl << "Elemental type of defence: " << elementNames[(int)defenceType];
-	cout << endl << "Elemental defence: " << this->elementDefence << "%";
-}
-
 Weapon::Weapon(double baseDamage, double elementDamage, Element damageType) {
 	this->baseDamage = baseDamage;
 	this->damageType = damageType;
@@ -167,7 +164,7 @@ Weapon::Weapon(double baseDamage, double elementDamage, Element damageType) {
 	else this->elementDamage = 0;
 }
 
-void Weapon::inputWeaponFields() {
+void Weapon::inputFields() {
 	int damageType;
 	cout << endl << "Enter base damage of a new weapon: ";
 	do {
@@ -195,7 +192,7 @@ void Weapon::inputWeaponFields() {
 }
 
 Weapon::Weapon() {
-	inputWeaponFields();
+	inputFields();
 }
 
 double Weapon::GetBaseDamage()
@@ -213,15 +210,7 @@ double Weapon::GetDamageType()
 	return damageType;
 }
 
-void Weapon::Print()
-{
-	cout << endl << "Player weapon:";
-	cout << endl << "Base damage: " << this->baseDamage;
-	cout << endl << "Elemental type of damage: " << elementNames[(int)damageType];
-	cout << endl << "Elemental damage: " << this->elementDamage;
-}
-
-void MonsterEntity::inputMonsterEntityFields() {
+void MonsterEntity::inputFields() {
 	int weakness;
 	int damageType;
 	cout << endl << "Enter base damage of " << name << " monster entity: ";
@@ -257,7 +246,7 @@ void MonsterEntity::inputMonsterEntityFields() {
 }
 
 MonsterEntity::MonsterEntity() {
-	inputMonsterEntityFields();
+	inputFields();
 }
 
 MonsterEntity::MonsterEntity(string name, double healthPoints, double movementSpeed, double baseDamage, double elementDamage, Element weakness, Element damageType) : LivingEntity(name, healthPoints, movementSpeed) {
@@ -270,10 +259,10 @@ MonsterEntity::MonsterEntity(string name, double healthPoints, double movementSp
 }
 
 PlayerEntity::PlayerEntity() {
-	inputPlayerEntityFields();
+	inputFields();
 }
 
-void PlayerEntity::inputPlayerEntityFields() {
+void PlayerEntity::inputFields() {
 	weapon = new Weapon();
 	armor = new Armor();
 	cout << endl << name << " player entity created!";
@@ -293,6 +282,23 @@ Weapon* PlayerEntity::GetWeapon()
 	return this->weapon;
 }
 
+ostream& operator<<(ostream& os, const LivingEntity& livingEntity)
+{
+	os << endl << endl << livingEntity.name << " entity:";
+	os << endl << "Health points: " << livingEntity.healthPoints;
+	os << endl << "Movement speed: " << livingEntity.movementSpeed;
+	return os;
+}
+
+ostream& operator<<(ostream& os, const Weapon& weapon)
+{
+	os << endl << "Player weapon:";
+	os << endl << "Base damage: " << weapon.baseDamage;
+	os << endl << "Elemental type of damage: " << elementNames[(int)weapon.damageType];
+	os << endl << "Elemental damage: " << weapon.elementDamage;
+	return os;
+}
+
 void AttackMonster(PlayerEntity& player, MonsterEntity& monster)
 {
 	double damage = player.weapon->GetBaseDamage();
@@ -301,6 +307,15 @@ void AttackMonster(PlayerEntity& player, MonsterEntity& monster)
 	else if (monster.GetMonsterWeakness() != none)
 		damage += player.weapon->GetElementDamage() * 0.5;
 	monster.Hurt(damage);
+}
+
+ostream& operator<<(ostream& os, const Armor& armor)
+{
+	os << endl << "Player armor:";
+	os << endl << "Base defence: " << armor.baseDefence << "%";
+	os << endl << "Elemental type of defence: " << elementNames[(int)armor.defenceType];
+	cout << endl << "Elemental defence: " << armor.elementDefence << "%";
+	return os;
 }
 
 void AttackPlayer(MonsterEntity& monster, PlayerEntity& player)
@@ -312,25 +327,38 @@ void AttackPlayer(MonsterEntity& monster, PlayerEntity& player)
 	player.Hurt(damage);
 }
 
-void PlayerEntity::Print()
-{
-	LivingEntity::Print();
-	GetArmor()->Print();
-	GetWeapon()->Print();
-}
-
-void MonsterEntity::Print() {
-	LivingEntity::Print();
-	cout << endl << "Base damage: " << baseDamage;
-	cout << endl << "Elemental type of damage: " << damageType;
-	cout << endl << "Elemental weakness type: " << weakness;
-	if (damageType != none)
-		cout << endl << "Elemental damage: " << elementDamage;
+PlayerEntity& PlayerEntity::operator=(const PlayerEntity& entity) {
+	if (this != &entity) {
+		LivingEntity::operator=(entity);
+		weapon = entity.weapon;
+		armor = entity.armor;
+	}
+	return *this;
 }
 
 Element MonsterEntity::GetMonsterWeakness()
 {
 	return weakness;
+}
+
+
+ostream& operator<<(ostream& os, const MonsterEntity& monster)
+{
+	os << static_cast<const LivingEntity&>(monster) << endl;
+	os << endl << "Base damage: " << monster.baseDamage;
+	cout << endl << "Elemental type of damage: " << monster.damageType;
+	cout << endl << "Elemental weakness type: " << monster.weakness;
+	if (monster.damageType != none)
+		cout << endl << "Elemental damage: " << monster.elementDamage;
+	return os;
+}
+
+ostream& operator<<(ostream& os, const PlayerEntity& player)
+{
+	os << static_cast<const LivingEntity&>(player) << endl;
+	os << static_cast<const Weapon&>(*player.weapon) << endl;
+	os << static_cast<const Armor&>(*player.armor) << endl;
+	return os;
 }
 
 int DamageTest::testChoice = 0;
@@ -389,17 +417,72 @@ void DamageTest::ChooseStruct()
 	} while (choice != 3);
 }
 
+template<typename TEntity>
+size_t EntitiesManager<TEntity>::size = 0;
+
+template<typename TEntity>
+size_t EntitiesManager<TEntity>::capacity = 10;
+
+template<typename TEntity>
+EntitiesManager<TEntity>::EntitiesManager(){
+	entities = new TEntity[capacity];
+}
+
+template<typename TEntity>
+EntitiesManager<TEntity>::~EntitiesManager() {
+	delete[] entities;
+}
+
+template<typename TEntity>
+void EntitiesManager<TEntity>::resize(size_t n) {
+	capacity += n;
+	TEntity* newEntities = new TEntity[capacity];
+	for (size_t i = 0; i < size; i++)
+		newEntities[i] = entities[i];
+	delete[] entities;
+	entities = newEntities;
+}
+
+template<typename TEntity>
+void EntitiesManager<TEntity>::addEntity(TEntity entity) {
+	if (size == capacity) resize(1);
+	entities[size++] = entity;
+}
+
+template<typename TEntity>
+void EntitiesManager<TEntity>::removeEntity(size_t index) {
+	if (index < size) {
+		for (int i = index; i < size - 1; i++) {
+			entities[i] = entities[i + 1];
+		}
+		size--;
+	}
+	else throw out_of_range("Index out of range");
+}
+
+template<typename TEntity>
+TEntity EntitiesManager<TEntity>::getEntity(size_t index) {
+	if (index < size)
+		return entities[index];
+	throw out_of_range("Index out of range");
+}
+
+template<typename TEntity>
+size_t EntitiesManager<TEntity>::getSize() {
+	return size;
+}
+
 void DamageTest::ChooseClass()
 {
 	int choice;
 	do {
 		cout << endl << "Choose class type:" << endl << "1)MonsterEntity" << endl <<
-			"2)PlayerEntity" << endl << "3)Armor" << endl << "4)2d and 1d array" << endl << "5)Exit" << endl;
+			"2)PlayerEntity" << endl << "3)Armor" << endl << "4)2d and 1d array" << endl << "5)EntitiesManager" << endl << "6)Exit" << endl;
 		do {
 			cin >> choice;
-			if (choice < 1 || choice > 5)
+			if (choice < 1 || choice > 6)
 				cout << "Wrong choice. Try again: " << endl;
-		} while (choice < 1 || choice > 5);
+		} while (choice < 1 || choice > 6);
 		MonsterEntity* monster1 = new MonsterEntity("Blob", 20, 1.5, 15, 8, magic, fire);
 		MonsterEntity* monster2 = new MonsterEntity("Ben", 20, 1.5, 15, 8, magic, lighting);
 		PlayerEntity* player1 = new PlayerEntity("Henry", 20, 1, new Armor(10, 35, fire), new Weapon(10, 10, fire));
@@ -408,8 +491,14 @@ void DamageTest::ChooseClass()
 		Armor armor2 = Armor(95, 20, magic);
 		Armor resArmor = Armor(0, 0, none);
 		Armor resArmor2 = Armor(0, 0, none);
-		LivingEntity objectsArray[4] = { LivingEntity("Blob", 10, 1.5), LivingEntity("Eddie", 35, 1), LivingEntity("Henry", 12, 2), LivingEntity("Ben", 43, 1) };
-		LivingEntity objectsMatrix[2][2] = {LivingEntity("Blob", 10, 1.5), LivingEntity("Eddie", 35, 1), LivingEntity("Henry", 12, 2), LivingEntity("Ben", 43, 1)};
+		EntitiesManager<LivingEntity>* manager = new EntitiesManager<LivingEntity>();
+		LivingEntity objectsArray[4] = { LivingEntity("Blob", 10, 1.5), LivingEntity("Eddie", 35, 1), 
+			LivingEntity("Henry", 12, 2), LivingEntity("Ben", 43, 1) };
+		LivingEntity objectsMatrix[2][2] = { LivingEntity("Blob", 10, 1.5), LivingEntity("Eddie", 35, 1), 
+			LivingEntity("Henry", 12, 2), LivingEntity("Ben", 43, 1) };
+		PlayerEntity henry = PlayerEntity("Henry", 20, 1, new Armor(10, 35, fire), new Weapon(10, 10, fire));
+		LivingEntity blob = LivingEntity("Blob", 10, 1.5);
+		blob = henry;
 		switch (choice) {
 		case 1:
 			cout << "Damage system test: monster attacks player:" << endl;
@@ -466,13 +555,29 @@ void DamageTest::ChooseClass()
 			cout << endl << endl << "Matrix: " << endl;
 			for (int i = 0; i < 2; i++)
 				for (int j = 0; j < 2; j++)
-					objectsMatrix[i][j].Print();
+					cout << objectsMatrix[i][j];
 			cout << endl << endl << "Array: " << endl;
 			for (int i = 0; i < 4; i++)
-				objectsArray[i].Print();
+				cout << objectsArray[i];
+			break;
+		case 5:
+			manager->addEntity(*monster1);
+			manager->addEntity(*monster2);
+			manager->addEntity(*player1);
+			manager->addEntity(*player2);
+			cout << endl << "Entities manager contains (before removing):" << endl << endl;
+			for (int i = 0; i < 4; i++) {
+				cout << manager->getEntity(i) << endl;
+			}
+			manager->removeEntity(2);
+			cout << endl << "Entities manager contains (after removing):" << endl << endl;
+			for (int i = 0; i < 3; i++) {
+				cout << (i + 1) + ") ";
+				cout << manager->getEntity(i) << endl;
+			}
 			break;
 		default:
 			break;
 		}
-	} while (choice != 5);
+	} while (choice != 6);
 }
