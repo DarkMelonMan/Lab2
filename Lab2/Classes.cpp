@@ -475,112 +475,154 @@ size_t EntitiesManager<TEntity>::getSize() {
 	return size;
 }
 
+void DamageTest::TestMonsterEntity()
+{
+	MonsterEntity* monster1 = new MonsterEntity("Blob", 20, 1.5, 15, 8, magic, fire);
+	MonsterEntity* monster2 = new MonsterEntity("Ben", 20, 1.5, 15, 8, magic, lighting);
+	PlayerEntity* player1 = new PlayerEntity("Henry", 20, 1, new Armor(10, 35, fire), new Weapon(10, 10, fire));
+	PlayerEntity* player2 = new PlayerEntity("Harry", 25, 1, new Armor(10, 35, magic), new Weapon(10, 10, magic));
+	cout << "Damage system test: monster attacks player:" << endl;
+	AttackPlayer(*monster1, *player1);
+	if (*player1->GetHealthPoints() + 0.00001 > 1.3 && *player1->GetHealthPoints() - 0.00001 < 1.3)
+		cout << endl << "Test 1 was successful";
+	else
+		throw TestError(*player1->GetHealthPoints(), 1.3, "player health points");
+	AttackPlayer(*monster2, *player2);
+	if (*player2->GetHealthPoints() + 0.00001 > 3.5 && *player2->GetHealthPoints() - 0.00001 < 3.5)
+		cout << endl << "Test 2 was successful";
+	else
+		throw TestError(*player2->GetHealthPoints(), 3.5, "player health points");
+}
+
+void DamageTest::TestPlayerEntity()
+{
+	MonsterEntity* monster1 = new MonsterEntity("Blob", 20, 1.5, 15, 8, magic, fire);
+	MonsterEntity* monster2 = new MonsterEntity("Ben", 20, 1.5, 15, 8, magic, lighting);
+	PlayerEntity* player1 = new PlayerEntity("Henry", 20, 1, new Armor(10, 35, fire), new Weapon(10, 10, fire));
+	PlayerEntity* player2 = new PlayerEntity("Harry", 25, 1, new Armor(10, 35, magic), new Weapon(10, 10, magic));
+	cout << "Damage system test: player attacks monster:" << endl;
+	AttackMonster(*player1, *monster1);
+	// Урон = 20 - 10 - 10 * 0.5 = 5
+	if (*monster1->GetHealthPoints() + 0.00001 > 5 && *monster1->GetHealthPoints() - 0.00001 < 5)
+		cout << endl << "Test 1 was successful";
+	else
+		throw TestError(*monster1->GetHealthPoints(), 5, "monster health points");
+	// Урон = 20 - 10 - 10 = 0
+	AttackMonster(*player2, *monster2);
+	if (*monster2->GetHealthPoints() + 0.00001 > 0 && *monster2->GetHealthPoints() - 0.00001 < 0)
+		cout << endl << "Test 2 was successful";
+	else
+		throw TestError(*monster2->GetHealthPoints(), 0, "monster health points");
+}
+
+void DamageTest::TestArmor()
+{
+	Armor armor1 = Armor(10, 35, fire);
+	Armor armor2 = Armor(95, 20, magic);
+	Armor resArmor = Armor(0, 0, none);
+	Armor resArmor2 = Armor(0, 0, none);
+	resArmor = armor1 + armor2;
+	if (resArmor.GetBaseDefence() + 0.00001 > 99 && resArmor.GetBaseDefence() - 0.00001 < 99 &&
+		resArmor.GetElementDefence() + 0.00001 > 35 && resArmor.GetElementDefence() - 0.00001 < 35 && resArmor.GetDefenceType() == fire)
+		cout << endl << "Test 1 was successful";
+	else {
+		throw TestError(resArmor.GetBaseDefence(), 99, "result armor base defence");
+		throw TestError(resArmor.GetElementDefence(), 35, "result armor element defence");
+		throw TestError(resArmor.GetDefenceType(), fire, "result armor defence type");
+	}
+	++armor1;
+	if (armor1.GetBaseDefence() + 0.00001 > 11 && armor1.GetBaseDefence() - 0.00001 < 11)
+		cout << endl << "Test 2 was successful";
+	else {
+		throw TestError(armor1.GetBaseDefence(), 11, "result armor base defence");
+	}
+	resArmor2 = armor1++;
+	if (resArmor2.GetBaseDefence() + 0.00001 > 11 && resArmor2.GetBaseDefence() - 0.00001 < 11)
+		cout << endl << "Test 3 was successful";
+	else {
+		throw TestError(resArmor2.GetBaseDefence(), 11, "result armor base defence");
+	}
+}
+
+void DamageTest::TestArrays() {
+	LivingEntity objectsArray[4] = { LivingEntity("Blob", 10, 1.5), LivingEntity("Eddie", 35, 1),
+			LivingEntity("Henry", 12, 2), LivingEntity("Ben", 43, 1) };
+	LivingEntity objectsMatrix[2][2] = { LivingEntity("Blob", 10, 1.5), LivingEntity("Eddie", 35, 1),
+		LivingEntity("Henry", 12, 2), LivingEntity("Ben", 43, 1) };
+	cout << endl << endl << "Matrix: " << endl;
+	for (int i = 0; i < 2; i++)
+		for (int j = 0; j < 2; j++)
+			cout << objectsMatrix[i][j];
+	cout << endl << endl << "Array: " << endl;
+	for (int i = 0; i < 4; i++)
+		cout << objectsArray[i];
+}
+
+void DamageTest::TestEntityManager() {
+	MonsterEntity* monster1 = new MonsterEntity("Blob", 20, 1.5, 15, 8, magic, fire);
+	MonsterEntity* monster2 = new MonsterEntity("Ben", 20, 1.5, 15, 8, magic, lighting);
+	PlayerEntity* player1 = new PlayerEntity("Henry", 20, 1, new Armor(10, 35, fire), new Weapon(10, 10, fire));
+	PlayerEntity* player2 = new PlayerEntity("Harry", 25, 1, new Armor(10, 35, magic), new Weapon(10, 10, magic));
+	EntitiesManager<LivingEntity>* manager = new EntitiesManager<LivingEntity>();
+	manager->addEntity(*monster1);
+	manager->addEntity(*monster2);
+	manager->addEntity(*player1);
+	manager->addEntity(*player2);
+	cout << endl << "Entities manager contains (before removing):" << endl << endl;
+	for (int i = 0; i < 4; i++) {
+		cout << manager->getEntity(i) << endl;
+	}
+	manager->removeEntity(2);
+	cout << endl << "Entities manager contains (after removing):" << endl << endl;
+	for (int i = 0; i < 3; i++) {
+		cout << (i + 1) + ") ";
+		cout << manager->getEntity(i) << endl;
+	}
+}
+
+void DamageTest::TestAssignment() {
+	PlayerEntity henry = PlayerEntity("Henry", 20, 1, new Armor(10, 35, fire), new Weapon(10, 10, fire));
+	LivingEntity blob = LivingEntity("Blob", 10, 1.5);
+	cout << blob << endl;
+	blob = henry;
+	cout << blob << endl;
+}
+
 void DamageTest::ChooseClass()
 {
 	int choice;
 	do {
 		cout << endl << "Choose class type:" << endl << "1)MonsterEntity" << endl <<
-			"2)PlayerEntity" << endl << "3)Armor" << endl << "4)2d and 1d array" << endl << "5)EntitiesManager" << endl << "6)Exit" << endl;
+			"2)PlayerEntity" << endl << "3)Armor" << endl << "4)2d and 1d array" << endl << "5)EntitiesManager" << endl 
+			<< "6)Assignment" << endl << "7)Exit" << endl;
 		do {
 			cin >> choice;
-			if (choice < 1 || choice > 6)
+			if (choice < 1 || choice > 7)
 				cout << "Wrong choice. Try again: " << endl;
-		} while (choice < 1 || choice > 6);
-		MonsterEntity* monster1 = new MonsterEntity("Blob", 20, 1.5, 15, 8, magic, fire);
-		MonsterEntity* monster2 = new MonsterEntity("Ben", 20, 1.5, 15, 8, magic, lighting);
-		PlayerEntity* player1 = new PlayerEntity("Henry", 20, 1, new Armor(10, 35, fire), new Weapon(10, 10, fire));
-		PlayerEntity* player2 = new PlayerEntity("Harry", 25, 1, new Armor(10, 35, magic), new Weapon(10, 10, magic));
-		Armor armor1 = Armor(10, 35, fire);
-		Armor armor2 = Armor(95, 20, magic);
-		Armor resArmor = Armor(0, 0, none);
-		Armor resArmor2 = Armor(0, 0, none);
-		EntitiesManager<LivingEntity>* manager = new EntitiesManager<LivingEntity>();
-		LivingEntity objectsArray[4] = { LivingEntity("Blob", 10, 1.5), LivingEntity("Eddie", 35, 1), 
-			LivingEntity("Henry", 12, 2), LivingEntity("Ben", 43, 1) };
-		LivingEntity objectsMatrix[2][2] = { LivingEntity("Blob", 10, 1.5), LivingEntity("Eddie", 35, 1), 
-			LivingEntity("Henry", 12, 2), LivingEntity("Ben", 43, 1) };
-		PlayerEntity henry = PlayerEntity("Henry", 20, 1, new Armor(10, 35, fire), new Weapon(10, 10, fire));
-		LivingEntity blob = LivingEntity("Blob", 10, 1.5);
-		blob = henry;
+		} while (choice < 1 || choice > 7);
+		
 		switch (choice) {
 		case 1:
-			cout << "Damage system test: monster attacks player:" << endl;
-			AttackPlayer(*monster1, *player1);
-			if (*player1->GetHealthPoints() + 0.00001 > 1.3 && *player1->GetHealthPoints() - 0.00001 < 1.3)
-				cout << endl << "Test 1 was successful";
-			else
-				throw TestError(*player1->GetHealthPoints(), 1.3, "player health points");
-			AttackPlayer(*monster2, *player2);
-			if (*player2->GetHealthPoints() + 0.00001 > 3.5 && *player2->GetHealthPoints() - 0.00001 < 3.5)
-				cout << endl << "Test 2 was successful";
-			else
-				throw TestError(*player2->GetHealthPoints(), 3.5, "player health points");
+			TestMonsterEntity();
 			break;
 		case 2:
-			cout << "Damage system test: player attacks monster:" << endl;
-			AttackMonster(*player1, *monster1);
-			// Урон = 20 - 10 - 10 * 0.5 = 5
-			if (*monster1->GetHealthPoints() + 0.00001 > 5 && *monster1->GetHealthPoints() - 0.00001 < 5)
-				cout << endl << "Test 1 was successful";
-			else
-				throw TestError(*monster1->GetHealthPoints(), 5, "monster health points");
-			// Урон = 20 - 10 - 10 = 0
-			AttackMonster(*player2, *monster2);
-			if (*monster2->GetHealthPoints() + 0.00001 > 0 && *monster2->GetHealthPoints() - 0.00001 < 0)
-				cout << endl << "Test 2 was successful";
-			else
-				throw TestError(*monster2->GetHealthPoints(), 0, "monster health points");
+			TestPlayerEntity();
 			break;
 		case 3:
-			resArmor = armor1 + armor2;
-			if (resArmor.GetBaseDefence() + 0.00001 > 99 && resArmor.GetBaseDefence() - 0.00001 < 99 &&
-				resArmor.GetElementDefence() + 0.00001 > 35 && resArmor.GetElementDefence() - 0.00001 < 35 && resArmor.GetDefenceType() == fire)
-				cout << endl << "Test 1 was successful";
-			else {
-				throw TestError(resArmor.GetBaseDefence(), 99, "result armor base defence");
-				throw TestError(resArmor.GetElementDefence(), 35, "result armor element defence");
-				throw TestError(resArmor.GetDefenceType(), fire, "result armor defence type");
-			}
-			++armor1;
-			if (armor1.GetBaseDefence() + 0.00001 > 11 && armor1.GetBaseDefence() - 0.00001 < 11)
-				cout << endl << "Test 2 was successful";
-			else {
-				throw TestError(armor1.GetBaseDefence(), 11, "result armor base defence");
-			}
-			resArmor2 = armor1++;
-			if (resArmor2.GetBaseDefence() + 0.00001 > 11 && resArmor2.GetBaseDefence() - 0.00001 < 11)
-				cout << endl << "Test 3 was successful";
-			else {
-				throw TestError(resArmor2.GetBaseDefence(), 11, "result armor base defence");
-			}
+			TestArmor();
 			break;
 		case 4:
-			cout << endl << endl << "Matrix: " << endl;
-			for (int i = 0; i < 2; i++)
-				for (int j = 0; j < 2; j++)
-					cout << objectsMatrix[i][j];
-			cout << endl << endl << "Array: " << endl;
-			for (int i = 0; i < 4; i++)
-				cout << objectsArray[i];
+			TestArrays();
 			break;
 		case 5:
-			manager->addEntity(*monster1);
-			manager->addEntity(*monster2);
-			manager->addEntity(*player1);
-			manager->addEntity(*player2);
-			cout << endl << "Entities manager contains (before removing):" << endl << endl;
-			for (int i = 0; i < 4; i++) {
-				cout << manager->getEntity(i) << endl;
-			}
-			manager->removeEntity(2);
-			cout << endl << "Entities manager contains (after removing):" << endl << endl;
-			for (int i = 0; i < 3; i++) {
-				cout << (i + 1) + ") ";
-				cout << manager->getEntity(i) << endl;
-			}
+			TestEntityManager();
+			break;
+		case 6:
+			TestAssignment();
 			break;
 		default:
 			break;
 		}
-	} while (choice != 6);
+	} while (choice != 7);
 }
+
