@@ -186,7 +186,8 @@ private:
 	/// </summary>
 	void inputFields() override;
 public:
-	MonsterEntity(string name, double healthPoints, double movementSpeed, double baseDamage, double elementDamage, Element weakness, Element damageType);
+	MonsterEntity(string name, double healthPoints, double movementSpeed, 
+		double baseDamage, double elementDamage, Element weakness, Element damageType);
 	MonsterEntity();
 	
 	/// <summary>
