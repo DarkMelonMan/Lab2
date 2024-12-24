@@ -231,6 +231,18 @@ public:
 	/// Поле, обозначающее вариант тестирования: тестирование структур или тестирование классов 
 	/// </summary>
 	static int testChoice;	
+
+	static void TestMonsterEntity();
+
+	static void TestPlayerEntity();
+
+	static void TestArmor();
+
+	static void TestArrays();
+
+	static void TestEntityManager();
+
+	static void TestAssignment();
 };
 
 /// <summary>
