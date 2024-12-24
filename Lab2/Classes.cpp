@@ -211,6 +211,7 @@ double Weapon::GetDamageType()
 }
 
 void MonsterEntity::inputFields() {
+	LivingEntity::inputFields();
 	int weakness;
 	int damageType;
 	cout << endl << "Enter base damage of " << name << " monster entity: ";
@@ -249,7 +250,8 @@ MonsterEntity::MonsterEntity() {
 	inputFields();
 }
 
-MonsterEntity::MonsterEntity(string name, double healthPoints, double movementSpeed, double baseDamage, double elementDamage, Element weakness, Element damageType) : LivingEntity(name, healthPoints, movementSpeed) {
+MonsterEntity::MonsterEntity(string name, double healthPoints, double movementSpeed, 
+	double baseDamage, double elementDamage, Element weakness, Element damageType) : LivingEntity(name, healthPoints, movementSpeed) {
 	this->baseDamage = baseDamage;
 	if (damageType != none)
 		this->elementDamage = elementDamage;
@@ -263,6 +265,7 @@ PlayerEntity::PlayerEntity() {
 }
 
 void PlayerEntity::inputFields() {
+	LivingEntity::inputFields();
 	weapon = new Weapon();
 	armor = new Armor();
 	cout << endl << name << " player entity created!";
